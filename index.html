@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -173,159 +172,225 @@ function renderCreateGame() {
       <input type="text" id="gameName" placeholder="חג המשרד 2024" value="גמד ענק 🎅">
       <label>👥 רשימת משתתפים <small style="color:#999;font-weight:400">(שם בכל שורה)</small></label>
       <textarea id="namesInput" placeholder="ישראל ישראלי&#10;שרה כהן&#10;משה לוי&#10;רחל אברהם"></textarea>
-
-```
-  <button class="btn btn-green" id="btnDoCreate" style="margin-bottom:10px">🚀 צור משחק!</button>
-  <button class="btn btn-gold" id="btnBack" style="font-size:0.95rem">← חזרה</button>
-</div>`;
-```
-
-$(‘btnDoCreate’).onclick = doCreateGame;
-$(‘btnBack’).onclick = renderHome;
+      <button class="btn btn-green" id="btnDoCreate" style="margin-bottom:10px">🚀 צור משחק!</button>
+      <button class="btn btn-gold" id="btnBack" style="font-size:0.95rem">← חזרה</button>
+    </div>`;
+  $('btnDoCreate').onclick = doCreateGame;
+  $('btnBack').onclick = renderHome;
 }
 
 async function doCreateGame() {
-const name = $(‘gameName’).value.trim() || ‘גמד ענק’;
-const raw = $(‘namesInput’).value.trim();
-if (!raw) { showAlert(‘createAlert’,‘error’,‘⚠️ הכנס/י שמות’); return; }
-const names = […new Set(raw.split(’\n’).map(n=>n.trim()).filter(Boolean))];
-if (names.length < 3) { showAlert(‘createAlert’,‘error’,‘⚠️ צריך לפחות 3 משתתפים’); return; }
-showAlert(‘createAlert’,‘info’,‘⏳ יוצר משחק…’);
-const gameId = Math.random().toString(36).substring(2,8).toUpperCase();
-try {
-await setDoc(doc(db,‘games’,gameId), { name, names, assignments:{}, drawn:[], createdAt:Date.now() });
-currentGame = { id:gameId, name, names, assignments:{}, drawn:[] };
-renderAdminView(gameId);
-} catch(e) { showAlert(‘createAlert’,‘error’,’❌ ’+e.message); }
+  const name = $('gameName').value.trim() || 'גמד ענק';
+  const raw = $('namesInput').value.trim();
+  if (!raw) { showAlert('createAlert','error','⚠️ הכנס/י שמות'); return; }
+  const names = [...new Set(raw.split('\n').map(n=>n.trim()).filter(Boolean))];
+  if (names.length < 3) { showAlert('createAlert','error','⚠️ צריך לפחות 3 משתתפים'); return; }
+  showAlert('createAlert','info','⏳ יוצר משחק...');
+  const gameId = Math.random().toString(36).substring(2,8).toUpperCase();
+  try {
+    await setDoc(doc(db,'games',gameId), { name, names, assignments:{}, drawn:[], createdAt:Date.now() });
+    currentGame = { id:gameId, name, names, assignments:{}, drawn:[] };
+    renderAdminView(gameId);
+  } catch(e) { showAlert('createAlert','error','❌ '+e.message); }
 }
 
 // ── JOIN GAME ──
 function renderJoinGame() {
-mc().innerHTML = ` <div class="card"> <h2>🔗 הצטרף למשחק</h2> <div id="joinAlert"></div> <label>קוד המשחק</label> <input type="text" id="joinCode" placeholder="ABC123" style="text-transform:uppercase;font-size:1.5rem;text-align:center;letter-spacing:4px" maxlength="6"> <button class="btn btn-primary" id="btnDoJoin" style="margin-bottom:10px">🎁 כניסה</button> <button class="btn btn-gold" id="btnBack" style="font-size:0.95rem">← חזרה</button> </div>`;
-$(‘joinCode’).oninput = function(){ this.value=this.value.toUpperCase(); };
-$(‘btnDoJoin’).onclick = async function() {
-const code = $(‘joinCode’).value.trim().toUpperCase();
-if (code.length < 3) { showAlert(‘joinAlert’,‘error’,‘⚠️ הכנס/י קוד תקין’); return; }
-showAlert(‘joinAlert’,‘info’,‘⏳ מחפש…’);
-try {
-const snap = await getDoc(doc(db,‘games’,code));
-if (!snap.exists()) { showAlert(‘joinAlert’,‘error’,‘❌ קוד לא נמצא’); return; }
-await loadParticipantView(code);
-} catch(e) { showAlert(‘joinAlert’,‘error’,’❌ ’+e.message); }
-};
-$(‘btnBack’).onclick = renderHome;
+  mc().innerHTML = `
+    <div class="card">
+      <h2>🔗 הצטרף למשחק</h2>
+      <div id="joinAlert"></div>
+      <label>קוד המשחק</label>
+      <input type="text" id="joinCode" placeholder="ABC123" style="text-transform:uppercase;font-size:1.5rem;text-align:center;letter-spacing:4px" maxlength="6">
+      <button class="btn btn-primary" id="btnDoJoin" style="margin-bottom:10px">🎁 כניסה</button>
+      <button class="btn btn-gold" id="btnBack" style="font-size:0.95rem">← חזרה</button>
+    </div>`;
+  $('joinCode').oninput = function(){ this.value=this.value.toUpperCase(); };
+  $('btnDoJoin').onclick = async function() {
+    const code = $('joinCode').value.trim().toUpperCase();
+    if (code.length < 3) { showAlert('joinAlert','error','⚠️ הכנס/י קוד תקין'); return; }
+    showAlert('joinAlert','info','⏳ מחפש...');
+    try {
+      const snap = await getDoc(doc(db,'games',code));
+      if (!snap.exists()) { showAlert('joinAlert','error','❌ קוד לא נמצא'); return; }
+      await loadParticipantView(code);
+    } catch(e) { showAlert('joinAlert','error','❌ '+e.message); }
+  };
+  $('btnBack').onclick = renderHome;
 }
 
 // ── ADMIN VIEW ──
 function renderAdminView(gameId) {
-const shareUrl = `${location.origin}${location.pathname}?game=${gameId}`;
-const data = currentGame;
-mc().innerHTML = ` <div class="card"> <div class="tabs"> <button class="tab active" id="tab-share">🔗 שיתוף</button> <button class="tab" id="tab-status">📊 סטטוס</button> </div> <div id="admin-share"> <h2>🎄 ${data.name}</h2> <div class="alert alert-success">✅ קוד המשחק: <strong style="font-size:1.3em;letter-spacing:3px">${gameId}</strong></div> <label>🔗 שלח את הלינק לכולם</label> <div class="url-box"> <span style="flex:1;word-break:break-all">${shareUrl}</span> <button class="copy-btn" id="btnCopy">📋 העתק</button> </div> <div style="background:rgba(192,57,43,0.07);border-radius:12px;padding:14px;margin-bottom:16px;font-size:0.9rem;color:#555;line-height:1.7"> 👆 כל אחד פותח את הלינק, בוחר שם, ומגריל.<br> <strong>הכל קורה בענן — בזמן אמת!</strong> </div> <label>👥 משתתפים (${data.names.length})</label> <div style="margin-bottom:16px">${data.names.map(n=>`<span class="name-chip">🎄 ${n}</span>`).join('')}</div> </div> <div id="admin-status" style="display:none"> <h2>📊 סטטוס</h2> <div id="statusContent"><div class="loading"><div class="spinner"></div></div></div> <br><button class="btn btn-primary btn-sm" id="btnReset">🔄 אפס הגרלות</button> </div> </div> <button class="btn btn-gold" id="btnHome" style="max-width:520px;width:100%;margin-bottom:20px">🏠 דף הבית</button>`;
+  const shareUrl = `${location.origin}${location.pathname}?game=${gameId}`;
+  const data = currentGame;
+  mc().innerHTML = `
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" id="tab-share">🔗 שיתוף</button>
+        <button class="tab" id="tab-status">📊 סטטוס</button>
+      </div>
+      <div id="admin-share">
+        <h2>🎄 ${data.name}</h2>
+        <div class="alert alert-success">✅ קוד המשחק: <strong style="font-size:1.3em;letter-spacing:3px">${gameId}</strong></div>
+        <label>🔗 שלח את הלינק לכולם</label>
+        <div class="url-box">
+          <span style="flex:1;word-break:break-all">${shareUrl}</span>
+          <button class="copy-btn" id="btnCopy">📋 העתק</button>
+        </div>
+        <div style="background:rgba(192,57,43,0.07);border-radius:12px;padding:14px;margin-bottom:16px;font-size:0.9rem;color:#555;line-height:1.7">
+          👆 כל אחד פותח את הלינק, בוחר שם, ומגריל.<br>
+          <strong>הכל קורה בענן — בזמן אמת!</strong>
+        </div>
+        <label>👥 משתתפים (${data.names.length})</label>
+        <div style="margin-bottom:16px">${data.names.map(n=>`<span class="name-chip">🎄 ${n}</span>`).join('')}</div>
+      </div>
+      <div id="admin-status" style="display:none">
+        <h2>📊 סטטוס</h2>
+        <div id="statusContent"><div class="loading"><div class="spinner"></div></div></div>
+        <br><button class="btn btn-primary btn-sm" id="btnReset">🔄 אפס הגרלות</button>
+      </div>
+    </div>
+    <button class="btn btn-gold" id="btnHome" style="max-width:520px;width:100%;margin-bottom:20px">🏠 דף הבית</button>`;
 
-$(‘tab-share’).onclick = () => { $(‘admin-share’).style.display=‘block’; $(‘admin-status’).style.display=‘none’; $(‘tab-share’).className=‘tab active’; $(‘tab-status’).className=‘tab’; };
-$(‘tab-status’).onclick = () => { $(‘admin-share’).style.display=‘none’; $(‘admin-status’).style.display=‘block’; $(‘tab-share’).className=‘tab’; $(‘tab-status’).className=‘tab active’; };
-$(‘btnCopy’).onclick = () => { navigator.clipboard.writeText(shareUrl).then(()=>toast(‘✅ הלינק הועתק!’)).catch(()=>toast(‘❌ לא הצליח’,‘error’)); };
-$(‘btnReset’).onclick = async () => { if(!confirm(‘לאפס?’)) return; await updateDoc(doc(db,‘games’,gameId),{assignments:{},drawn:[]}); toast(‘🔄 אופס!’); };
-$(‘btnHome’).onclick = renderHome;
+  $('tab-share').onclick = () => { $('admin-share').style.display='block'; $('admin-status').style.display='none'; $('tab-share').className='tab active'; $('tab-status').className='tab'; };
+  $('tab-status').onclick = () => { $('admin-share').style.display='none'; $('admin-status').style.display='block'; $('tab-share').className='tab'; $('tab-status').className='tab active'; };
+  $('btnCopy').onclick = () => { navigator.clipboard.writeText(shareUrl).then(()=>toast('✅ הלינק הועתק!')).catch(()=>toast('❌ לא הצליח','error')); };
+  $('btnReset').onclick = async () => { if(!confirm('לאפס?')) return; await updateDoc(doc(db,'games',gameId),{assignments:{},drawn:[]}); toast('🔄 אופס!'); };
+  $('btnHome').onclick = renderHome;
 
-// Live listener
-if(unsubscribe){unsubscribe();unsubscribe=null;}
-unsubscribe = onSnapshot(doc(db,‘games’,gameId), snap => {
-if(!snap.exists()) return;
-const d = snap.data();
-currentGame = { id:gameId, …d };
-const sc = $(‘statusContent’);
-if(!sc) return;
-const assigned = Object.keys(d.assignments||{}).length;
-sc.innerHTML = ` <div class="alert alert-${assigned===d.names.length?'success':'info'}"> ${assigned===d.names.length?'🎉 כולם הגרילו!':'⏳ '+assigned+' מתוך '+d.names.length+' הגרילו'} </div> <table class="status-table"><tbody> ${d.names.map(n=>`<tr><td>🎄 ${n}   ${d.assignments[n]?’<span class="badge badge-green">✅</span>’:’<span class="badge badge-gray">⏳</span>’}</td></tr>`).join('')} </tbody></table>`;
-});
+  // Live listener
+  if(unsubscribe){unsubscribe();unsubscribe=null;}
+  unsubscribe = onSnapshot(doc(db,'games',gameId), snap => {
+    if(!snap.exists()) return;
+    const d = snap.data();
+    currentGame = { id:gameId, ...d };
+    const sc = $('statusContent');
+    if(!sc) return;
+    const assigned = Object.keys(d.assignments||{}).length;
+    sc.innerHTML = `
+      <div class="alert alert-${assigned===d.names.length?'success':'info'}">
+        ${assigned===d.names.length?'🎉 כולם הגרילו!':'⏳ '+assigned+' מתוך '+d.names.length+' הגרילו'}
+      </div>
+      <table class="status-table"><tbody>
+        ${d.names.map(n=>`<tr><td>🎄 ${n} &nbsp; ${d.assignments[n]?'<span class="badge badge-green">✅</span>':'<span class="badge badge-gray">⏳</span>'}</td></tr>`).join('')}
+      </tbody></table>`;
+  });
 }
 
 // ── PARTICIPANT VIEW ──
 async function loadParticipantView(gameId) {
-try {
-const snap = await getDoc(doc(db,‘games’,gameId));
-if(!snap.exists()) { mc().innerHTML=`<div class="card"><div class="alert alert-error">❌ משחק לא נמצא</div><button class="btn btn-primary" id="bh">🏠 דף הבית</button></div>`; $(‘bh’).onclick=renderHome; return; }
-currentGame = { id:gameId, …snap.data() };
-renderParticipantLogin(gameId, snap.data());
-} catch(e) { mc().innerHTML=`<div class="card"><div class="alert alert-error">❌ ${e.message}</div></div>`; }
+  try {
+    const snap = await getDoc(doc(db,'games',gameId));
+    if(!snap.exists()) { mc().innerHTML=`<div class="card"><div class="alert alert-error">❌ משחק לא נמצא</div><button class="btn btn-primary" id="bh">🏠 דף הבית</button></div>`; $('bh').onclick=renderHome; return; }
+    currentGame = { id:gameId, ...snap.data() };
+    renderParticipantLogin(gameId, snap.data());
+  } catch(e) { mc().innerHTML=`<div class="card"><div class="alert alert-error">❌ ${e.message}</div></div>`; }
 }
 
 function renderParticipantLogin(gameId, data) {
-mc().innerHTML = ` <div class="card"> <h2>🎁 ${data.name}</h2> <div id="pAlert"></div> <div id="loginSection"> <label>👤 מה השם שלך?</label> <select id="pSelect"> <option value="">-- בחר/י את שמך --</option> ${data.names.map(n=>`<option value="${n}">${n}</option>`).join('')} </select> <button class="btn btn-primary" id="btnLogin">✨ כניסה</button> </div> <div id="revealSection" style="display:none"> <div style="text-align:center"> <div style="font-size:1.1rem;color:#555;margin-bottom:20px;line-height:1.6"> היי <strong id="loginName"></strong>! 👋<br>לחץ/י לגלות את מי את/ה קונה מתנה... </div> <span class="santa-icon">🎅</span> <button class="btn btn-gold" id="btnReveal">🎁 חשוף את הגמד שלי!</button> </div> <div class="giftee-reveal" id="gifteeReveal"> <span class="gift-box">🎁</span> <div style="color:#888;font-size:1rem;margin-bottom:4px">את/ה קונה מתנה ל...</div> <div class="giftee-name" id="gifteeName"></div> <div style="color:#777;font-size:0.95rem;margin-bottom:10px">זכור/י לשמור בסוד! 🤫</div> <div class="confetti-msg">🎉 מזל טוב! קנה/י מתנה מגניבה!</div> <br> <button class="btn btn-primary btn-sm" id="btnLogout">👋 יציאה</button> </div> </div> </div>`;
+  mc().innerHTML = `
+    <div class="card">
+      <h2>🎁 ${data.name}</h2>
+      <div id="pAlert"></div>
+      <div id="loginSection">
+        <label>👤 מה השם שלך?</label>
+        <select id="pSelect">
+          <option value="">-- בחר/י את שמך --</option>
+          ${data.names.map(n=>`<option value="${n}">${n}</option>`).join('')}
+        </select>
+        <button class="btn btn-primary" id="btnLogin">✨ כניסה</button>
+      </div>
+      <div id="revealSection" style="display:none">
+        <div style="text-align:center">
+          <div style="font-size:1.1rem;color:#555;margin-bottom:20px;line-height:1.6">
+            היי <strong id="loginName"></strong>! 👋<br>לחץ/י לגלות את מי את/ה קונה מתנה...
+          </div>
+          <span class="santa-icon">🎅</span>
+          <button class="btn btn-gold" id="btnReveal">🎁 חשוף את הגמד שלי!</button>
+        </div>
+        <div class="giftee-reveal" id="gifteeReveal">
+          <span class="gift-box">🎁</span>
+          <div style="color:#888;font-size:1rem;margin-bottom:4px">את/ה קונה מתנה ל...</div>
+          <div class="giftee-name" id="gifteeName"></div>
+          <div style="color:#777;font-size:0.95rem;margin-bottom:10px">זכור/י לשמור בסוד! 🤫</div>
+          <div class="confetti-msg">🎉 מזל טוב! קנה/י מתנה מגניבה!</div>
+          <br>
+          <button class="btn btn-primary btn-sm" id="btnLogout">👋 יציאה</button>
+        </div>
+      </div>
+    </div>`;
 
-$(‘btnLogin’).onclick = async function() {
-const name = $(‘pSelect’).value;
-if(!name) { showAlert(‘pAlert’,‘error’,‘⚠️ בחר/י שם’); return; }
-clearAlert(‘pAlert’);
-currentParticipant = name;
-$(‘loginSection’).style.display=‘none’;
-$(‘revealSection’).style.display=‘block’;
-$(‘loginName’).textContent=name;
-// Check if already drawn
-const snap = await getDoc(doc(db,‘games’,gameId));
-const d = snap.data();
-if(d.assignments && d.assignments[name]) showRevealResult(d.assignments[name]);
-};
+  $('btnLogin').onclick = async function() {
+    const name = $('pSelect').value;
+    if(!name) { showAlert('pAlert','error','⚠️ בחר/י שם'); return; }
+    clearAlert('pAlert');
+    currentParticipant = name;
+    $('loginSection').style.display='none';
+    $('revealSection').style.display='block';
+    $('loginName').textContent=name;
+    // Check if already drawn
+    const snap = await getDoc(doc(db,'games',gameId));
+    const d = snap.data();
+    if(d.assignments && d.assignments[name]) showRevealResult(d.assignments[name]);
+  };
 
-$(‘btnReveal’).onclick = async function() {
-const participant = currentParticipant;
-try {
-const snap = await getDoc(doc(db,‘games’,gameId));
-const d = snap.data();
-if(d.assignments && d.assignments[participant]) { showRevealResult(d.assignments[participant]); return; }
-const available = d.names.filter(n => n!==participant && !(d.drawn||[]).includes(n));
-if(available.length===0) { showAlert(‘pAlert’,‘error’,‘😱 כולם כבר נבחרו! דבר עם המארגן/ת.’); return; }
-const giftee = available[Math.floor(Math.random()*available.length)];
-await updateDoc(doc(db,‘games’,gameId), {
-[`assignments.${participant}`]: giftee,
-drawn: […(d.drawn||[]), giftee]
-});
-showRevealResult(giftee);
-} catch(e) { showAlert(‘pAlert’,‘error’,’❌ ’+e.message); }
-};
+  $('btnReveal').onclick = async function() {
+    const participant = currentParticipant;
+    try {
+      const snap = await getDoc(doc(db,'games',gameId));
+      const d = snap.data();
+      if(d.assignments && d.assignments[participant]) { showRevealResult(d.assignments[participant]); return; }
+      const available = d.names.filter(n => n!==participant && !(d.drawn||[]).includes(n));
+      if(available.length===0) { showAlert('pAlert','error','😱 כולם כבר נבחרו! דבר עם המארגן/ת.'); return; }
+      const giftee = available[Math.floor(Math.random()*available.length)];
+      await updateDoc(doc(db,'games',gameId), {
+        [`assignments.${participant}`]: giftee,
+        drawn: [...(d.drawn||[]), giftee]
+      });
+      showRevealResult(giftee);
+    } catch(e) { showAlert('pAlert','error','❌ '+e.message); }
+  };
 
-$(‘btnLogout’) && ($(‘btnLogout’).onclick = function() {
-currentParticipant=null;
-renderParticipantLogin(gameId, currentGame);
-});
+  $('btnLogout') && ($('btnLogout').onclick = function() {
+    currentParticipant=null;
+    renderParticipantLogin(gameId, currentGame);
+  });
 }
 
 function showRevealResult(giftee) {
-$(‘gifteeName’).textContent = giftee;
-$(‘gifteeReveal’).classList.add(‘show’);
-$(‘btnReveal’).style.display=‘none’;
-launchConfetti();
-// Re-wire logout after reveal shown
-setTimeout(()=>{ const b=$(‘btnLogout’); if(b) b.onclick=()=>{ currentParticipant=null; renderParticipantLogin(currentGame.id,currentGame); }; },100);
+  $('gifteeName').textContent = giftee;
+  $('gifteeReveal').classList.add('show');
+  $('btnReveal').style.display='none';
+  launchConfetti();
+  // Re-wire logout after reveal shown
+  setTimeout(()=>{ const b=$('btnLogout'); if(b) b.onclick=()=>{ currentParticipant=null; renderParticipantLogin(currentGame.id,currentGame); }; },100);
 }
 
 // ── CONFETTI ──
 function launchConfetti() {
-const canvas=$(‘confetti-canvas’), ctx=canvas.getContext(‘2d’);
-canvas.width=innerWidth; canvas.height=innerHeight;
-const colors=[’#C0392B’,’#27AE60’,’#F4D03F’,’#3498DB’,’#E67E22’,’#9B59B6’];
-const pieces=Array.from({length:120},()=>({
-x:Math.random()*canvas.width, y:-10,
-w:8+Math.random()*8, h:5+Math.random()*5,
-color:colors[Math.floor(Math.random()*colors.length)],
-vx:(Math.random()-.5)*6, vy:3+Math.random()*5,
-rot:Math.random()*360, vrot:(Math.random()-.5)*8
-}));
-let fr;
-(function anim(){
-ctx.clearRect(0,0,canvas.width,canvas.height);
-let alive=false;
-pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.15; p.rot+=p.vrot;
-if(p.y<canvas.height+20){ alive=true; ctx.save(); ctx.globalAlpha=Math.min(1,(canvas.height-p.y)/canvas.height+.3);
-ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }
-});
-if(alive) fr=requestAnimationFrame(anim); else ctx.clearRect(0,0,canvas.width,canvas.height);
-})();
+  const canvas=$('confetti-canvas'), ctx=canvas.getContext('2d');
+  canvas.width=innerWidth; canvas.height=innerHeight;
+  const colors=['#C0392B','#27AE60','#F4D03F','#3498DB','#E67E22','#9B59B6'];
+  const pieces=Array.from({length:120},()=>({
+    x:Math.random()*canvas.width, y:-10,
+    w:8+Math.random()*8, h:5+Math.random()*5,
+    color:colors[Math.floor(Math.random()*colors.length)],
+    vx:(Math.random()-.5)*6, vy:3+Math.random()*5,
+    rot:Math.random()*360, vrot:(Math.random()-.5)*8
+  }));
+  let fr;
+  (function anim(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive=false;
+    pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.15; p.rot+=p.vrot;
+      if(p.y<canvas.height+20){ alive=true; ctx.save(); ctx.globalAlpha=Math.min(1,(canvas.height-p.y)/canvas.height+.3);
+        ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }
+    });
+    if(alive) fr=requestAnimationFrame(anim); else ctx.clearRect(0,0,canvas.width,canvas.height);
+  })();
 }
 
 init();
 </script>
-
 </body>
 </html>
