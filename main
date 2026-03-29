@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>גמד ענק 🎅</title>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C0392B; --red-dark: #922B21; --green: #27AE60; --green-dark: #1E8449;
+    --gold: #F4D03F; --gold-dark: #D4AC0D; --cream: #FEF9F0; --dark: #1C1C1C;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Rubik',sans-serif; background:var(--red-dark); min-height:100vh; overflow-x:hidden; }
+  .snow-container { position:fixed; top:0; left:0; right:0; bottom:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .snowflake { position:absolute; top:-20px; color:rgba(255,255,255,0.5); animation:fall linear infinite; }
+  @keyframes fall { to { transform:translateY(105vh) rotate(360deg); } }
+  .app { position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:20px; }
+  .header { text-align:center; padding:30px 20px 10px; animation:slideDown 0.8s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes slideDown { from{opacity:0;transform:translateY(-50px)} to{opacity:1;transform:translateY(0)} }
+  .header h1 { font-family:'Fredoka One',cursive; font-size:clamp(2.5rem,8vw,4.5rem); color:var(--gold); text-shadow:3px 3px 0 var(--red-dark),0 0 30px rgba(244,208,63,0.5); letter-spacing:2px; }
+  .header .emoji-row { font-size:2rem; margin:5px 0; animation:bounce 2s infinite; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+  .header .subtitle { color:rgba(255,255,255,0.85); font-size:1rem; font-weight:500; }
+  .card { background:var(--cream); border-radius:24px; padding:32px; width:100%; max-width:520px; margin:20px auto; box-shadow:0 20px 60px rgba(0,0,0,0.3),0 0 0 4px var(--gold); animation:popIn 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
+  @keyframes popIn { from{opacity:0;transform:scale(0.8)} to{opacity:1;transform:scale(1)} }
+  .card h2 { font-family:'Fredoka One',cursive; font-size:1.6rem; color:var(--red-dark); margin-bottom:20px; text-align:center; }
+  .tabs { display:flex; gap:8px; margin-bottom:24px; background:rgba(192,57,43,0.1); padding:4px; border-radius:12px; }
+  .tab { flex:1; padding:10px; border:none; border-radius:10px; cursor:pointer; font-family:'Rubik',sans-serif; font-weight:700; font-size:0.9rem; transition:all 0.3s; background:transparent; color:var(--red); }
+  .tab.active { background:var(--red); color:white; box-shadow:0 4px 12px rgba(192,57,43,0.4); }
+  label { display:block; font-weight:700; color:var(--dark); margin-bottom:6px; font-size:0.95rem; }
+  input, textarea, select { width:100%; padding:12px 16px; border:2px solid #E0D5C5; border-radius:12px; font-family:'Rubik',sans-serif; font-size:1rem; color:var(--dark); background:white; transition:border-color 0.2s; outline:none; margin-bottom:16px; }
+  input:focus, textarea:focus, select:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(192,57,43,0.15); }
+  textarea { min-height:120px; resize:vertical; line-height:1.6; }
+  .btn { width:100%; padding:14px 20px; border:none; border-radius:12px; font-family:'Fredoka One',cursive; font-size:1.1rem; cursor:pointer; transition:all 0.2s; letter-spacing:0.5px; }
+  .btn-primary { background:linear-gradient(135deg,var(--red),var(--red-dark)); color:white; box-shadow:0 4px 15px rgba(192,57,43,0.4); }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(192,57,43,0.5); }
+  .btn-green { background:linear-gradient(135deg,var(--green),var(--green-dark)); color:white; box-shadow:0 4px 15px rgba(39,174,96,0.4); }
+  .btn-green:hover { transform:translateY(-2px); }
+  .btn-gold { background:linear-gradient(135deg,var(--gold),var(--gold-dark)); color:var(--dark); box-shadow:0 4px 15px rgba(244,208,63,0.4); }
+  .btn-gold:hover { transform:translateY(-2px); }
+  .btn-sm { width:auto; padding:6px 14px; font-size:0.85rem; border-radius:8px; }
+  .btn:disabled { opacity:0.5; cursor:not-allowed; transform:none !important; }
+  .alert { padding:12px 16px; border-radius:10px; margin-bottom:16px; font-weight:600; font-size:0.95rem; text-align:center; }
+  .alert-success { background:#D5F5E3; color:#1E8449; }
+  .alert-error { background:#FDEDEC; color:#922B21; }
+  .alert-info { background:#EBF5FB; color:#1A5276; }
+  .name-chip { display:inline-flex; align-items:center; background:rgba(192,57,43,0.1); color:var(--red-dark); border-radius:20px; padding:4px 12px; margin:3px; font-size:0.9rem; font-weight:600; }
+  .santa-icon { font-size:4rem; display:block; margin:10px auto; animation:wiggle 2s infinite; }
+  @keyframes wiggle { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(5deg)} }
+  .giftee-reveal { display:none; text-align:center; animation:zoomIn 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+  @keyframes zoomIn { from{opacity:0;transform:scale(0.5)} to{opacity:1;transform:scale(1)} }
+  .giftee-reveal.show { display:block; }
+  .gift-box { font-size:5rem; display:block; animation:pulse 1s ease-in-out 3; }
+  @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+  .giftee-name { font-family:'Fredoka One',cursive; font-size:clamp(2rem,8vw,3.5rem); color:var(--red-dark); margin:10px 0; }
+  .confetti-msg { background:linear-gradient(135deg,var(--gold),#F39C12); color:white; border-radius:12px; padding:12px 20px; font-weight:700; margin-top:10px; box-shadow:0 4px 15px rgba(244,208,63,0.4); }
+  .url-box { background:white; border:2px dashed var(--green); border-radius:12px; padding:12px 16px; margin-bottom:16px; word-break:break-all; font-size:0.85rem; color:var(--green-dark); font-weight:600; display:flex; align-items:center; gap:8px; }
+  .copy-btn { background:var(--green); color:white; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-family:'Rubik',sans-serif; font-weight:700; font-size:0.85rem; white-space:nowrap; flex-shrink:0; }
+  .copy-btn:hover { background:var(--green-dark); }
+  .status-table { width:100%; border-collapse:separate; border-spacing:0 6px; margin-top:8px; }
+  .status-table th { text-align:right; color:#888; font-size:0.8rem; font-weight:600; padding:0 10px 8px; text-transform:uppercase; }
+  .status-table td { padding:10px 12px; background:white; font-size:0.9rem; font-weight:500; border-radius:10px; }
+  .badge { display:inline-block; padding:2px 10px; border-radius:20px; font-size:0.8rem; font-weight:700; }
+  .badge-green { background:#D5F5E3; color:#1E8449; }
+  .badge-gray { background:#F0F0F0; color:#999; }
+  .loading { text-align:center; padding:30px; color:#888; }
+  .spinner { display:inline-block; width:30px; height:30px; border:3px solid #E0D5C5; border-top-color:var(--red); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:10px; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  #confetti-canvas { position:fixed; inset:0; pointer-events:none; z-index:100; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:#F0E9DF; border-radius:3px; }
+  ::-webkit-scrollbar-thumb { background:var(--red); border-radius:3px; }
+  @media (max-width:400px) { .card { padding:20px 16px; } }
+</style>
+</head>
+<body>
+<canvas id="confetti-canvas"></canvas>
+<div class="snow-container" id="snowContainer"></div>
+<div class="app">
+  <div class="header">
+    <div class="emoji-row">🎄🎅🎁🦌⛄</div>
+    <h1>גמד ענק</h1>
+    <p class="subtitle">Secret Santa • מי קונה למי?</p>
+  </div>
+  <div id="mainContent">
+    <div class="card"><div class="loading"><div class="spinner"></div><br>מתחבר...</div></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC-plwavlDdh0C8gDR5cQYzbPzhB2lKT3s",
+  authDomain: "secret-santa-eec09.firebaseapp.com",
+  projectId: "secret-santa-eec09",
+  storageBucket: "secret-santa-eec09.firebasestorage.app",
+  messagingSenderId: "1002360315118",
+  appId: "1:1002360315118:web:8252039cd99051a5ced3ef"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let currentGame = null;
+let currentParticipant = null;
+let unsubscribe = null;
+
+// ── SNOW ──
+(function() {
+  const c = document.getElementById('snowContainer');
+  const fl = ['❄','❅','❆','✦'];
+  for (let i=0;i<20;i++) {
+    const f=document.createElement('div'); f.className='snowflake';
+    f.textContent=fl[Math.floor(Math.random()*fl.length)];
+    f.style.left=Math.random()*100+'vw';
+    f.style.fontSize=(0.8+Math.random()*1.2)+'em';
+    f.style.animationDuration=(5+Math.random()*10)+'s';
+    f.style.animationDelay=(-Math.random()*10)+'s';
+    f.style.opacity=0.3+Math.random()*0.5;
+    c.appendChild(f);
+  }
+})();
+
+// ── HELPERS ──
+const $ = id => document.getElementById(id);
+const mc = () => $('mainContent');
+function showAlert(id,type,msg) { const e=$(id); if(e) e.innerHTML=`<div class="alert alert-${type}">${msg}</div>`; }
+function clearAlert(id) { const e=$(id); if(e) e.innerHTML=''; }
+function toast(msg,type='success') {
+  const d=document.createElement('div');
+  d.className=`alert alert-${type}`;
+  d.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;min-width:220px;box-shadow:0 4px 20px rgba(0,0,0,0.25);animation:popIn 0.3s ease';
+  d.textContent=msg; document.body.appendChild(d);
+  setTimeout(()=>d.remove(),2500);
+}
+
+// ── ROUTING ──
+const urlGameId = new URLSearchParams(location.search).get('game');
+
+async function init() {
+  if (urlGameId) {
+    await loadParticipantView(urlGameId);
+  } else {
+    renderHome();
+  }
+}
+
+// ── HOME ──
+function renderHome() {
+  if(unsubscribe){unsubscribe();unsubscribe=null;}
+  mc().innerHTML = `
+    <div class="card">
+      <h2>🎅 ברוכים הבאים!</h2>
+      <p style="text-align:center;color:#777;margin-bottom:20px;font-size:0.95rem">צור משחק, שלח לינק לחברים,<br>וכל אחד מגריל בעצמו 🎁</p>
+      <button class="btn btn-primary" id="btnCreate" style="margin-bottom:12px">✨ צור משחק חדש</button>
+      <button class="btn btn-gold" id="btnJoin">🔗 הצטרף עם קוד</button>
+    </div>`;
+  $('btnCreate').onclick = renderCreateGame;
+  $('btnJoin').onclick = renderJoinGame;
+}
+
+// ── CREATE GAME ──
+function renderCreateGame() {
+  mc().innerHTML = `
+    <div class="card">
+      <h2>🎄 צור משחק חדש</h2>
+      <div id="createAlert"></div>
+      <label>📝 שם המשחק</label>
+      <input type="text" id="gameName" placeholder="חג המשרד 2024" value="גמד ענק 🎅">
+      <label>👥 רשימת משתתפים <small style="color:#999;font-weight:400">(שם בכל שורה)</small></label>
+      <textarea id="namesInput" placeholder="ישראל ישראלי&#10;שרה כהן&#10;משה לוי&#10;רחל אברהם"></textarea>
+
+```
+  <button class="btn btn-green" id="btnDoCreate" style="margin-bottom:10px">🚀 צור משחק!</button>
+  <button class="btn btn-gold" id="btnBack" style="font-size:0.95rem">← חזרה</button>
+</div>`;
+```
+
+$(‘btnDoCreate’).onclick = doCreateGame;
+$(‘btnBack’).onclick = renderHome;
+}
+
+async function doCreateGame() {
+const name = $(‘gameName’).value.trim() || ‘גמד ענק’;
+const raw = $(‘namesInput’).value.trim();
+if (!raw) { showAlert(‘createAlert’,‘error’,‘⚠️ הכנס/י שמות’); return; }
+const names = […new Set(raw.split(’\n’).map(n=>n.trim()).filter(Boolean))];
+if (names.length < 3) { showAlert(‘createAlert’,‘error’,‘⚠️ צריך לפחות 3 משתתפים’); return; }
+showAlert(‘createAlert’,‘info’,‘⏳ יוצר משחק…’);
+const gameId = Math.random().toString(36).substring(2,8).toUpperCase();
+try {
+await setDoc(doc(db,‘games’,gameId), { name, names, assignments:{}, drawn:[], createdAt:Date.now() });
+currentGame = { id:gameId, name, names, assignments:{}, drawn:[] };
+renderAdminView(gameId);
+} catch(e) { showAlert(‘createAlert’,‘error’,’❌ ’+e.message); }
+}
+
+// ── JOIN GAME ──
+function renderJoinGame() {
+mc().innerHTML = ` <div class="card"> <h2>🔗 הצטרף למשחק</h2> <div id="joinAlert"></div> <label>קוד המשחק</label> <input type="text" id="joinCode" placeholder="ABC123" style="text-transform:uppercase;font-size:1.5rem;text-align:center;letter-spacing:4px" maxlength="6"> <button class="btn btn-primary" id="btnDoJoin" style="margin-bottom:10px">🎁 כניסה</button> <button class="btn btn-gold" id="btnBack" style="font-size:0.95rem">← חזרה</button> </div>`;
+$(‘joinCode’).oninput = function(){ this.value=this.value.toUpperCase(); };
+$(‘btnDoJoin’).onclick = async function() {
+const code = $(‘joinCode’).value.trim().toUpperCase();
+if (code.length < 3) { showAlert(‘joinAlert’,‘error’,‘⚠️ הכנס/י קוד תקין’); return; }
+showAlert(‘joinAlert’,‘info’,‘⏳ מחפש…’);
+try {
+const snap = await getDoc(doc(db,‘games’,code));
+if (!snap.exists()) { showAlert(‘joinAlert’,‘error’,‘❌ קוד לא נמצא’); return; }
+await loadParticipantView(code);
+} catch(e) { showAlert(‘joinAlert’,‘error’,’❌ ’+e.message); }
+};
+$(‘btnBack’).onclick = renderHome;
+}
+
+// ── ADMIN VIEW ──
+function renderAdminView(gameId) {
+const shareUrl = `${location.origin}${location.pathname}?game=${gameId}`;
+const data = currentGame;
+mc().innerHTML = ` <div class="card"> <div class="tabs"> <button class="tab active" id="tab-share">🔗 שיתוף</button> <button class="tab" id="tab-status">📊 סטטוס</button> </div> <div id="admin-share"> <h2>🎄 ${data.name}</h2> <div class="alert alert-success">✅ קוד המשחק: <strong style="font-size:1.3em;letter-spacing:3px">${gameId}</strong></div> <label>🔗 שלח את הלינק לכולם</label> <div class="url-box"> <span style="flex:1;word-break:break-all">${shareUrl}</span> <button class="copy-btn" id="btnCopy">📋 העתק</button> </div> <div style="background:rgba(192,57,43,0.07);border-radius:12px;padding:14px;margin-bottom:16px;font-size:0.9rem;color:#555;line-height:1.7"> 👆 כל אחד פותח את הלינק, בוחר שם, ומגריל.<br> <strong>הכל קורה בענן — בזמן אמת!</strong> </div> <label>👥 משתתפים (${data.names.length})</label> <div style="margin-bottom:16px">${data.names.map(n=>`<span class="name-chip">🎄 ${n}</span>`).join('')}</div> </div> <div id="admin-status" style="display:none"> <h2>📊 סטטוס</h2> <div id="statusContent"><div class="loading"><div class="spinner"></div></div></div> <br><button class="btn btn-primary btn-sm" id="btnReset">🔄 אפס הגרלות</button> </div> </div> <button class="btn btn-gold" id="btnHome" style="max-width:520px;width:100%;margin-bottom:20px">🏠 דף הבית</button>`;
+
+$(‘tab-share’).onclick = () => { $(‘admin-share’).style.display=‘block’; $(‘admin-status’).style.display=‘none’; $(‘tab-share’).className=‘tab active’; $(‘tab-status’).className=‘tab’; };
+$(‘tab-status’).onclick = () => { $(‘admin-share’).style.display=‘none’; $(‘admin-status’).style.display=‘block’; $(‘tab-share’).className=‘tab’; $(‘tab-status’).className=‘tab active’; };
+$(‘btnCopy’).onclick = () => { navigator.clipboard.writeText(shareUrl).then(()=>toast(‘✅ הלינק הועתק!’)).catch(()=>toast(‘❌ לא הצליח’,‘error’)); };
+$(‘btnReset’).onclick = async () => { if(!confirm(‘לאפס?’)) return; await updateDoc(doc(db,‘games’,gameId),{assignments:{},drawn:[]}); toast(‘🔄 אופס!’); };
+$(‘btnHome’).onclick = renderHome;
+
+// Live listener
+if(unsubscribe){unsubscribe();unsubscribe=null;}
+unsubscribe = onSnapshot(doc(db,‘games’,gameId), snap => {
+if(!snap.exists()) return;
+const d = snap.data();
+currentGame = { id:gameId, …d };
+const sc = $(‘statusContent’);
+if(!sc) return;
+const assigned = Object.keys(d.assignments||{}).length;
+sc.innerHTML = ` <div class="alert alert-${assigned===d.names.length?'success':'info'}"> ${assigned===d.names.length?'🎉 כולם הגרילו!':'⏳ '+assigned+' מתוך '+d.names.length+' הגרילו'} </div> <table class="status-table"><tbody> ${d.names.map(n=>`<tr><td>🎄 ${n}   ${d.assignments[n]?’<span class="badge badge-green">✅</span>’:’<span class="badge badge-gray">⏳</span>’}</td></tr>`).join('')} </tbody></table>`;
+});
+}
+
+// ── PARTICIPANT VIEW ──
+async function loadParticipantView(gameId) {
+try {
+const snap = await getDoc(doc(db,‘games’,gameId));
+if(!snap.exists()) { mc().innerHTML=`<div class="card"><div class="alert alert-error">❌ משחק לא נמצא</div><button class="btn btn-primary" id="bh">🏠 דף הבית</button></div>`; $(‘bh’).onclick=renderHome; return; }
+currentGame = { id:gameId, …snap.data() };
+renderParticipantLogin(gameId, snap.data());
+} catch(e) { mc().innerHTML=`<div class="card"><div class="alert alert-error">❌ ${e.message}</div></div>`; }
+}
+
+function renderParticipantLogin(gameId, data) {
+mc().innerHTML = ` <div class="card"> <h2>🎁 ${data.name}</h2> <div id="pAlert"></div> <div id="loginSection"> <label>👤 מה השם שלך?</label> <select id="pSelect"> <option value="">-- בחר/י את שמך --</option> ${data.names.map(n=>`<option value="${n}">${n}</option>`).join('')} </select> <button class="btn btn-primary" id="btnLogin">✨ כניסה</button> </div> <div id="revealSection" style="display:none"> <div style="text-align:center"> <div style="font-size:1.1rem;color:#555;margin-bottom:20px;line-height:1.6"> היי <strong id="loginName"></strong>! 👋<br>לחץ/י לגלות את מי את/ה קונה מתנה... </div> <span class="santa-icon">🎅</span> <button class="btn btn-gold" id="btnReveal">🎁 חשוף את הגמד שלי!</button> </div> <div class="giftee-reveal" id="gifteeReveal"> <span class="gift-box">🎁</span> <div style="color:#888;font-size:1rem;margin-bottom:4px">את/ה קונה מתנה ל...</div> <div class="giftee-name" id="gifteeName"></div> <div style="color:#777;font-size:0.95rem;margin-bottom:10px">זכור/י לשמור בסוד! 🤫</div> <div class="confetti-msg">🎉 מזל טוב! קנה/י מתנה מגניבה!</div> <br> <button class="btn btn-primary btn-sm" id="btnLogout">👋 יציאה</button> </div> </div> </div>`;
+
+$(‘btnLogin’).onclick = async function() {
+const name = $(‘pSelect’).value;
+if(!name) { showAlert(‘pAlert’,‘error’,‘⚠️ בחר/י שם’); return; }
+clearAlert(‘pAlert’);
+currentParticipant = name;
+$(‘loginSection’).style.display=‘none’;
+$(‘revealSection’).style.display=‘block’;
+$(‘loginName’).textContent=name;
+// Check if already drawn
+const snap = await getDoc(doc(db,‘games’,gameId));
+const d = snap.data();
+if(d.assignments && d.assignments[name]) showRevealResult(d.assignments[name]);
+};
+
+$(‘btnReveal’).onclick = async function() {
+const participant = currentParticipant;
+try {
+const snap = await getDoc(doc(db,‘games’,gameId));
+const d = snap.data();
+if(d.assignments && d.assignments[participant]) { showRevealResult(d.assignments[participant]); return; }
+const available = d.names.filter(n => n!==participant && !(d.drawn||[]).includes(n));
+if(available.length===0) { showAlert(‘pAlert’,‘error’,‘😱 כולם כבר נבחרו! דבר עם המארגן/ת.’); return; }
+const giftee = available[Math.floor(Math.random()*available.length)];
+await updateDoc(doc(db,‘games’,gameId), {
+[`assignments.${participant}`]: giftee,
+drawn: […(d.drawn||[]), giftee]
+});
+showRevealResult(giftee);
+} catch(e) { showAlert(‘pAlert’,‘error’,’❌ ’+e.message); }
+};
+
+$(‘btnLogout’) && ($(‘btnLogout’).onclick = function() {
+currentParticipant=null;
+renderParticipantLogin(gameId, currentGame);
+});
+}
+
+function showRevealResult(giftee) {
+$(‘gifteeName’).textContent = giftee;
+$(‘gifteeReveal’).classList.add(‘show’);
+$(‘btnReveal’).style.display=‘none’;
+launchConfetti();
+// Re-wire logout after reveal shown
+setTimeout(()=>{ const b=$(‘btnLogout’); if(b) b.onclick=()=>{ currentParticipant=null; renderParticipantLogin(currentGame.id,currentGame); }; },100);
+}
+
+// ── CONFETTI ──
+function launchConfetti() {
+const canvas=$(‘confetti-canvas’), ctx=canvas.getContext(‘2d’);
+canvas.width=innerWidth; canvas.height=innerHeight;
+const colors=[’#C0392B’,’#27AE60’,’#F4D03F’,’#3498DB’,’#E67E22’,’#9B59B6’];
+const pieces=Array.from({length:120},()=>({
+x:Math.random()*canvas.width, y:-10,
+w:8+Math.random()*8, h:5+Math.random()*5,
+color:colors[Math.floor(Math.random()*colors.length)],
+vx:(Math.random()-.5)*6, vy:3+Math.random()*5,
+rot:Math.random()*360, vrot:(Math.random()-.5)*8
+}));
+let fr;
+(function anim(){
+ctx.clearRect(0,0,canvas.width,canvas.height);
+let alive=false;
+pieces.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=.15; p.rot+=p.vrot;
+if(p.y<canvas.height+20){ alive=true; ctx.save(); ctx.globalAlpha=Math.min(1,(canvas.height-p.y)/canvas.height+.3);
+ctx.translate(p.x,p.y); ctx.rotate(p.rot*Math.PI/180); ctx.fillStyle=p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore(); }
+});
+if(alive) fr=requestAnimationFrame(anim); else ctx.clearRect(0,0,canvas.width,canvas.height);
+})();
+}
+
+init();
+</script>
+
+</body>
+</html>
